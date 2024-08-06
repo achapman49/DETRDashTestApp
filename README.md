@@ -1,0 +1,1 @@
+This is a dual test of Plotly Dash and DETR I created as a proof of concept. I got the idea from a Plotly Dash intro video and wrote the code in about 3 hours with assistance from GPT 4o. View the final app here: https://upgraded-adventure-pv6qpg6j467f7r74-8050.app.github.dev/
