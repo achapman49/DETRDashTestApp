@@ -17,13 +17,23 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 # Initialize the Dash app
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
+# Default image URL
+default_image_url = 'https://funnyfuzzy.com/cdn/shop/files/1_7_8268a208-07f8-4bf8-b0b4-21c42f6fe348.jpg?v=1694689052&width=1000'
+
 # Layout of the Dash app
-app.layout = html.Div([
-    html.H1("Object Detection in Images"),
-    dcc.Input(id='image-url', type='text', placeholder='Enter Image URL', style={'width': '70%'}),
+app.layout = html.Div(style={'textAlign': 'center'}, children=[
+    html.H1("Dash Demo: Object Detection with DETR"),
+    html.P("Enter an image URL to detect objects"),
+    dcc.Input(id='image-url', type='text', placeholder='Enter Image URL', style={'width': '70%', 'margin': 'auto'}),
     html.Button('Submit', id='submit-button', n_clicks=0),
-    html.Div(id='output-image'),
-    html.Div(id='output-chart')
+    dcc.Loading(
+        id='loading',
+        type='default',
+        children=[
+            html.Div(id='output-image', style={'width': '80%', 'margin': 'auto'}),
+            html.Div(id='output-chart', style={'width': '70%', 'margin': '40px auto 0 auto'})
+        ]
+    )
 ])
 
 # Global variables to store labels and scores
@@ -156,16 +166,19 @@ def get_score_tag(score):
     [State('image-url', 'value')]
 )
 def update_output(n_clicks, image_url):
-    if n_clicks > 0 and image_url:
-        image_np, boxes, labels, scores, color_map = detect_objects(image_url)
-        image_fig = generate_image(image_np, boxes, labels, scores, color_map)
-        score_fig = plot_object_scores(global_labels_scores, color_map)
+    if n_clicks == 0 and not image_url:
+        image_url = default_image_url
+    elif n_clicks > 0 and not image_url:
+        return [html.Div(), html.Div()]
+    
+    image_np, boxes, labels, scores, color_map = detect_objects(image_url)
+    image_fig = generate_image(image_np, boxes, labels, scores, color_map)
+    score_fig = plot_object_scores(global_labels_scores, color_map)
 
-        return [
-            dcc.Graph(figure=image_fig),
-            dcc.Graph(figure=score_fig)
-        ]
-    return [html.Div(), html.Div()]
+    return [
+        dcc.Graph(figure=image_fig, style={'width': '80%', 'margin': 'auto'}),
+        dcc.Graph(figure=score_fig, style={'width': '70%', 'margin': '40px auto 0 auto'})
+    ]
 
 if __name__ == '__main__':
     app.run_server(debug=True)
